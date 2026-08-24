@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { fetchAssetDetails } from "@/lib/seasonality";
 
+export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET(

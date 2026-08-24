@@ -1,6 +1,6 @@
-import { db } from "@/db";
+import { db, ensureSchema } from "@/db";
 import { assets, monthlySeasonality, seasonalWindows, assetTechnicals, seasonalUpdates } from "@/db/schema";
-import { eq } from "drizzle-orm";
+
 
 export interface SeedAssetData {
   ticker: string;
@@ -626,6 +626,7 @@ export const RECENT_UPDATES = [
 
 export async function ensureSeedData() {
   try {
+    await ensureSchema();
     const existing = await db.select().from(assets).limit(1);
     if (existing.length > 0) {
       return { success: true, message: "Database already seeded." };

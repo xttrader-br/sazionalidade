@@ -5,14 +5,9 @@ import {
   X,
   ExternalLink,
   Calendar,
-  Award,
   Activity,
-  TrendingUp,
-  ChevronRight,
   ShieldCheck,
-  Zap,
-  Info,
-  Layers
+  Info
 } from "lucide-react";
 import {
   ResponsiveContainer,

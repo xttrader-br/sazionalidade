@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { fetchAllAssetsWithBias } from "@/lib/seasonality";
-import { db } from "@/db";
+import { db, ensureSchema } from "@/db";
 import { assets, monthlySeasonality, assetTechnicals } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
+export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
@@ -46,12 +47,13 @@ export async function POST(request: Request) {
 
     const uppercaseTicker = ticker.toUpperCase();
 
+    await ensureSchema();
     const existing = await db.select().from(assets).where(eq(assets.ticker, uppercaseTicker)).limit(1);
     if (existing.length > 0) {
       return NextResponse.json({ success: false, error: `Asset ${uppercaseTicker} already exists.` }, { status: 409 });
     }
 
-    const [inserted] = await db.insert(assets).values({
+    const insertedRows = await db.insert(assets).values({
       ticker: uppercaseTicker,
       name,
       category,
@@ -59,6 +61,10 @@ export async function POST(request: Request) {
       description: description || `Historical seasonal analysis for ${name}`,
       equityclockUrl: equityclockUrl || `https://equityclock.com/charts/${uppercaseTicker.toLowerCase()}-seasonal-chart/`,
     }).returning();
+    const inserted = insertedRows[0];
+    if (!inserted) {
+      return NextResponse.json({ success: false, error: "Failed to insert asset." }, { status: 500 });
+    }
 
     const months = [1,2,3,4,5,6,7,8,9,10,11,12];
     for (const m of months) {

@@ -3,10 +3,7 @@
 import React, { useState } from "react";
 import { AssetWithBias, MONTH_NAMES } from "@/types/seasonality";
 import {
-  ExternalLink,
   ChevronRight,
-  TrendingUp,
-  Activity,
   ShieldCheck,
   Calendar,
   Grid,
@@ -258,7 +255,7 @@ export default function AssetGrid({
       {filteredAssets.length === 0 && (
         <div className="py-16 text-center bg-slate-900 border border-slate-800 rounded-2xl text-slate-400 space-y-2">
           <p className="font-semibold text-white">Nenhum ativo encontrado.</p>
-          <p className="text-xs">Tente ajustar a busca por termo ou selecione "All" nas categorias.</p>
+          <p className="text-xs">Tente ajustar a busca por termo ou selecione &quot;All&quot; nas categorias.</p>
         </div>
       )}
     </div>

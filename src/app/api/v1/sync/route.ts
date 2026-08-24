@@ -4,6 +4,7 @@ import { assetTechnicals } from "@/db/schema";
 import { fetchAllAssetsWithBias } from "@/lib/seasonality";
 import { eq } from "drizzle-orm";
 
+export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST() {
@@ -35,7 +36,7 @@ export async function POST() {
     return NextResponse.json({
       success: true,
       timestamp: new Date().toISOString(),
-      message: `Successfully synchronized ${updatedCount} assets with latest EquityClock & market technicals in SQLite.`,
+      message: `Atualizados ${updatedCount} ativos (simulação local de cotações). Sem feed externo.`,
     });
   } catch (err: any) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { AssetWithBias, MONTH_NAMES } from "@/types/seasonality";
-import { Sparkles, Layers, RefreshCw } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import {
   ResponsiveContainer,
   LineChart,

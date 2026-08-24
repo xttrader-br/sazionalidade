@@ -7,19 +7,55 @@ import { AssetWithBias, MONTH_NAMES } from "@/types/seasonality";
 export type { AssetWithBias };
 export { MONTH_NAMES };
 
-export async function fetchAllAssetsWithBias(monthOverride?: number): Promise<AssetWithBias[]> {
-  await ensureSeedData();
+function groupByAssetId<T extends { assetId: number }>(rows: T[]): Map<number, T[]> {
+  const map = new Map<number, T[]>();
+  for (const row of rows) {
+    const list = map.get(row.assetId);
+    if (list) list.push(row);
+    else map.set(row.assetId, [row]);
+  }
+  return map;
+}
 
-  const currentMonth = monthOverride || (new Date().getMonth() + 1); // 1-12
+function resolveBias(
+  winRate: number,
+  avgReturn: number,
+  windowBias?: string
+): "bullish" | "bearish" | "neutral" {
+  if (windowBias === "bullish" || windowBias === "bearish" || windowBias === "neutral") {
+    return windowBias;
+  }
+  if (winRate >= 60 && avgReturn > 0.5) return "bullish";
+  if (winRate <= 45 && avgReturn < -0.5) return "bearish";
+  return "neutral";
+}
+
+async function requireSeed() {
+  const seed = await ensureSeedData();
+  if (!seed.success) {
+    throw new Error(seed.error || "Falha ao inicializar o banco de dados.");
+  }
+}
+
+export async function fetchAllAssetsWithBias(monthOverride?: number): Promise<AssetWithBias[]> {
+  await requireSeed();
+
+  const currentMonth = monthOverride ?? new Date().getMonth() + 1;
   const currentDay = new Date().getDate();
 
-  const allAssets = await db.select().from(assets);
-  const results: AssetWithBias[] = [];
+  const [allAssets, allTech, allMonths, allWindows] = await Promise.all([
+    db.select().from(assets),
+    db.select().from(assetTechnicals),
+    db.select().from(monthlySeasonality),
+    db.select().from(seasonalWindows),
+  ]);
 
-  for (const asset of allAssets) {
-    // Get technicals
-    const tech = await db.select().from(assetTechnicals).where(eq(assetTechnicals.assetId, asset.id)).limit(1);
-    const techData = tech[0] || {
+  const techByAsset = new Map(allTech.map((row) => [row.assetId, row]));
+  const monthsByAsset = groupByAssetId(allMonths);
+  const windowsByAsset = groupByAssetId(allWindows);
+
+  return allAssets.map((asset) => {
+    const techData = techByAsset.get(asset.id) ?? {
       lastPrice: 100,
       dayChangePct: 0,
       rsi14: 50,
@@ -28,39 +64,18 @@ export async function fetchAllAssetsWithBias(monthOverride?: number): Promise<As
       confluenceScore: 70,
     };
 
-    // Get 12-month stats
-    const monthStats = await db.select().from(monthlySeasonality).where(eq(monthlySeasonality.assetId, asset.id));
-    monthStats.sort((a, b) => a.month - b.month);
-
-    const currentMonthStat = monthStats.find((m) => m.month === currentMonth) || {
+    const monthStats = [...(monthsByAsset.get(asset.id) ?? [])].sort((a, b) => a.month - b.month);
+    const currentMonthStat = monthStats.find((m) => m.month === currentMonth) ?? {
       winRate: 50,
       avgReturn: 0,
     };
 
-    // Check active seasonal windows
-    const windows = await db.select().from(seasonalWindows).where(eq(seasonalWindows.assetId, asset.id));
-    
-    let activeWindow: typeof windows[0] | undefined;
-    for (const w of windows) {
-      if (isDateInWindow(currentMonth, currentDay, w.startMonth, w.startDay, w.endMonth, w.endDay)) {
-        activeWindow = w;
-        break;
-      }
-    }
+    const windows = windowsByAsset.get(asset.id) ?? [];
+    const activeWindow = windows.find((w) =>
+      isDateInWindow(currentMonth, currentDay, w.startMonth, w.startDay, w.endMonth, w.endDay)
+    );
 
-    // Determine bias: priority to active window, else monthly avg return & win rate
-    let currentBias: "bullish" | "bearish" | "neutral" = "neutral";
-    if (activeWindow) {
-      currentBias = activeWindow.bias as "bullish" | "bearish" | "neutral";
-    } else {
-      if (currentMonthStat.winRate >= 60 && currentMonthStat.avgReturn > 0.5) {
-        currentBias = "bullish";
-      } else if (currentMonthStat.winRate <= 45 && currentMonthStat.avgReturn < -0.5) {
-        currentBias = "bearish";
-      }
-    }
-
-    results.push({
+    return {
       id: asset.id,
       ticker: asset.ticker,
       name: asset.name,
@@ -71,12 +86,12 @@ export async function fetchAllAssetsWithBias(monthOverride?: number): Promise<As
       lastPrice: techData.lastPrice,
       dayChangePct: techData.dayChangePct,
       rsi14: techData.rsi14,
-      aboveSma50: techData.aboveSma50,
-      aboveSma200: techData.aboveSma200,
+      aboveSma50: Boolean(techData.aboveSma50),
+      aboveSma200: Boolean(techData.aboveSma200),
       confluenceScore: techData.confluenceScore ?? 70,
       currentMonthWinRate: currentMonthStat.winRate,
       currentMonthAvgReturn: currentMonthStat.avgReturn,
-      currentBias,
+      currentBias: resolveBias(currentMonthStat.winRate, currentMonthStat.avgReturn, activeWindow?.bias),
       activeWindowTitle: activeWindow?.title,
       activeWindowReturn: activeWindow?.avgReturn,
       monthlyStats: monthStats.map((m) => ({
@@ -84,25 +99,25 @@ export async function fetchAllAssetsWithBias(monthOverride?: number): Promise<As
         winRate: m.winRate,
         avgReturn: m.avgReturn,
       })),
-    });
-  }
-
-  return results;
+    };
+  });
 }
 
 export async function fetchAssetDetails(ticker: string) {
-  await ensureSeedData();
+  await requireSeed();
 
   const assetList = await db.select().from(assets).where(eq(assets.ticker, ticker.toUpperCase())).limit(1);
   if (assetList.length === 0) return null;
 
   const asset = assetList[0];
-  const monthly = await db.select().from(monthlySeasonality).where(eq(monthlySeasonality.assetId, asset.id));
-  monthly.sort((a, b) => a.month - b.month);
+  const [monthly, windows, tech, updates] = await Promise.all([
+    db.select().from(monthlySeasonality).where(eq(monthlySeasonality.assetId, asset.id)),
+    db.select().from(seasonalWindows).where(eq(seasonalWindows.assetId, asset.id)),
+    db.select().from(assetTechnicals).where(eq(assetTechnicals.assetId, asset.id)).limit(1),
+    db.select().from(seasonalUpdates).where(eq(seasonalUpdates.ticker, asset.ticker)).limit(5),
+  ]);
 
-  const windows = await db.select().from(seasonalWindows).where(eq(seasonalWindows.assetId, asset.id));
-  const tech = await db.select().from(assetTechnicals).where(eq(assetTechnicals.assetId, asset.id)).limit(1);
-  const updates = await db.select().from(seasonalUpdates).where(eq(seasonalUpdates.ticker, asset.ticker)).limit(5);
+  monthly.sort((a, b) => a.month - b.month);
 
   let cumulative = 100;
   const cumulativeData = monthly.map((m) => {
@@ -122,19 +137,10 @@ export async function fetchAssetDetails(ticker: string) {
   const now = new Date();
   const currentMonth = now.getMonth() + 1;
   const currentDay = now.getDate();
-
-  let activeWindow = windows.find((w) =>
+  const activeWindow = windows.find((w) =>
     isDateInWindow(currentMonth, currentDay, w.startMonth, w.startDay, w.endMonth, w.endDay)
   );
-
   const currentStat = monthly.find((m) => m.month === currentMonth);
-  let bias: "bullish" | "bearish" | "neutral" = "neutral";
-  if (activeWindow) {
-    bias = activeWindow.bias as any;
-  } else if (currentStat) {
-    if (currentStat.winRate >= 60 && currentStat.avgReturn > 0.5) bias = "bullish";
-    else if (currentStat.winRate <= 45 && currentStat.avgReturn < -0.5) bias = "bearish";
-  }
 
   return {
     asset,
@@ -142,7 +148,7 @@ export async function fetchAssetDetails(ticker: string) {
     windows,
     technicals: tech[0] || null,
     updates,
-    activeBias: bias,
+    activeBias: resolveBias(currentStat?.winRate ?? 50, currentStat?.avgReturn ?? 0, activeWindow?.bias),
     activeWindow,
   };
 }
@@ -161,7 +167,6 @@ export function isDateInWindow(
 
   if (startVal <= endVal) {
     return currentVal >= startVal && currentVal <= endVal;
-  } else {
-    return currentVal >= startVal || currentVal <= endVal;
   }
+  return currentVal >= startVal || currentVal <= endVal;
 }
