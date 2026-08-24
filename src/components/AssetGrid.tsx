@@ -3,10 +3,7 @@
 import React, { useState } from "react";
 import { AssetWithBias, MONTH_NAMES } from "@/types/seasonality";
 import {
-  ExternalLink,
   ChevronRight,
-  TrendingUp,
-  Activity,
   ShieldCheck,
   Calendar,
   Grid,

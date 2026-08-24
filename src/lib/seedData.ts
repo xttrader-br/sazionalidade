@@ -1,6 +1,6 @@
 import { db, ensureSchema } from "@/db";
 import { assets, monthlySeasonality, seasonalWindows, assetTechnicals, seasonalUpdates } from "@/db/schema";
-import { eq } from "drizzle-orm";
+
 
 export interface SeedAssetData {
   ticker: string;

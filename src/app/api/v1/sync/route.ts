@@ -35,7 +35,7 @@ export async function POST() {
     return NextResponse.json({
       success: true,
       timestamp: new Date().toISOString(),
-      message: `Successfully synchronized ${updatedCount} assets with latest EquityClock & market technicals in SQLite.`,
+      message: `Atualizados ${updatedCount} ativos (simulação local de cotações). Sem feed externo.`,
     });
   } catch (err: any) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });

@@ -2,20 +2,14 @@
 
 import React, { useState } from "react";
 import {
-  Code2,
   Terminal,
   Play,
   Copy,
   Check,
-  ExternalLink,
   BookOpen,
-  HelpCircle,
   Zap,
   Server,
-  Cloud,
-  Globe,
   Database,
-  ArrowRight,
   HardDrive
 } from "lucide-react";
 

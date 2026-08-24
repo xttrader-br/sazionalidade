@@ -44,7 +44,7 @@ export async function GET(request: Request) {
         sector: a.sector,
         currentBias: a.currentBias,
         activeWindow: a.activeWindowTitle || null,
-        activeWindowAvgReturnPct: a.activeWindowReturn || null,
+        activeWindowAvgReturnPct: a.activeWindowReturn ?? null,
         currentMonthWinRatePct: a.currentMonthWinRate,
         currentMonthAvgReturnPct: a.currentMonthAvgReturn,
         confluenceScore: a.confluenceScore,

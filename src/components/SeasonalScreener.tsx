@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { AssetWithBias, MONTH_NAMES } from "@/types/seasonality";
-import { Sliders, Filter, ArrowUpRight, Award, TrendingUp, ShieldCheck } from "lucide-react";
+import { Sliders, ArrowUpRight } from "lucide-react";
 import BiasBadge from "./BiasBadge";
 
 interface SeasonalScreenerProps {

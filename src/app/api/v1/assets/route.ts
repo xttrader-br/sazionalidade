@@ -52,7 +52,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: `Asset ${uppercaseTicker} already exists.` }, { status: 409 });
     }
 
-    const [inserted] = await db.insert(assets).values({
+    const insertedRows = await db.insert(assets).values({
       ticker: uppercaseTicker,
       name,
       category,
@@ -60,6 +60,10 @@ export async function POST(request: Request) {
       description: description || `Historical seasonal analysis for ${name}`,
       equityclockUrl: equityclockUrl || `https://equityclock.com/charts/${uppercaseTicker.toLowerCase()}-seasonal-chart/`,
     }).returning();
+    const inserted = insertedRows[0];
+    if (!inserted) {
+      return NextResponse.json({ success: false, error: "Failed to insert asset." }, { status: 500 });
+    }
 
     const months = [1,2,3,4,5,6,7,8,9,10,11,12];
     for (const m of months) {

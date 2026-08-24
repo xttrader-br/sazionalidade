@@ -10,7 +10,7 @@ import ScraperGuideAndApiDocs from "@/components/ScraperGuideAndApiDocs";
 import AssetDetailModal from "@/components/AssetDetailModal";
 import AddAssetModal from "@/components/AddAssetModal";
 import { AssetWithBias } from "@/types/seasonality";
-import { TrendingUp, RefreshCw, AlertCircle } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState<"explorer" | "heatmap" | "screener" | "compare" | "apidocs">("explorer");
@@ -78,7 +78,7 @@ export default function HomePage() {
           <div className="py-24 text-center space-y-4">
             <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
             <p className="text-sm text-slate-400 font-medium">
-              Carregando dados de bias sazonal do EquityClock e métricas do PostgreSQL...
+              Carregando dados de bias sazonal e métricas locais...
             </p>
           </div>
         ) : error ? (
@@ -133,7 +133,7 @@ export default function HomePage() {
       <footer className="border-t border-slate-900 bg-slate-950 py-6 text-xs text-slate-500 text-center">
         <div className="max-w-7xl mx-auto px-4 space-y-2">
           <p>
-            EquityClock Bias & Seasonality Analytics Portal • PostgreSQL + Drizzle ORM + Next.js App Router
+            Sazionalidade • libSQL / SQLite + Drizzle ORM + Next.js App Router
           </p>
           <p className="text-[11px] text-slate-600">
             Aviso de Isenção: As análises estatísticas sazonais são baseadas em dados históricos de 20 anos e não constituem recomendação de investimento.

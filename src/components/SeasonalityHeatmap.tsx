@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { AssetWithBias, MONTH_NAMES } from "@/types/seasonality";
-import { Layers, Flame, Percent, ArrowUpDown } from "lucide-react";
+import { Flame, Percent, ArrowUpDown } from "lucide-react";
 import BiasBadge from "./BiasBadge";
 
 interface SeasonalityHeatmapProps {
@@ -20,7 +20,7 @@ export default function SeasonalityHeatmap({ assets, onSelectAsset }: Seasonalit
     return a.category.toLowerCase() === selectedCategory.toLowerCase();
   });
 
-  function getCellBg(val: number, isWinRate: boolean, isCurrentMonth: boolean) {
+  function getCellBg(val: number, isWinRate: boolean) {
     if (isWinRate) {
       if (val >= 75) return "bg-emerald-600/80 text-white font-bold";
       if (val >= 65) return "bg-emerald-500/40 text-emerald-200 font-semibold";
@@ -164,7 +164,7 @@ export default function SeasonalityHeatmap({ assets, onSelectAsset }: Seasonalit
                         : monthStat.avgReturn
                       : 0;
 
-                    const cellBgClass = getCellBg(val, metric === "winRate", isCurrent);
+                    const cellBgClass = getCellBg(val, metric === "winRate");
 
                     return (
                       <td
