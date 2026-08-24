@@ -11,7 +11,7 @@
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.14",
     "@radix-ui/react-slot": "^1.2.3",
-    "@vercel/analytics": "latest",
+    "@vercel/analytics": "^1.5.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.44.5",
@@ -26,7 +26,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "eslint": "^9",
+    "eslint": "^8.57.1",
     "eslint-config-next": "^15.5.0",
     "typescript": "^5"
   }
