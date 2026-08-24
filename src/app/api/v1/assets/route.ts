@@ -4,6 +4,7 @@ import { db, ensureSchema } from "@/db";
 import { assets, monthlySeasonality, assetTechnicals } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
+export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {

@@ -4,6 +4,7 @@ import { assetTechnicals } from "@/db/schema";
 import { fetchAllAssetsWithBias } from "@/lib/seasonality";
 import { eq } from "drizzle-orm";
 
+export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST() {

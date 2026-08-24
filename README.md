@@ -49,9 +49,32 @@ npm run db:generate
 npm run db:studio
 ```
 
-## Deploy
+## Deploy na Vercel (import do GitHub)
 
-O projeto está vinculado ao repositório `xttrader-br/sazionalidade` na Vercel. Cada push na branch de produção pode disparar um novo deploy conforme as configurações do projeto.
+Pronto para **Add New Project → Import** em [vercel.com/new](https://vercel.com/new):
+
+| Campo na Vercel | Valor |
+|---|---|
+| Framework Preset | Next.js (detectado; `vercel.json` confirma) |
+| Root Directory | `.` (raiz do repo) |
+| Install Command | `npm ci` |
+| Build Command | `npm run build` |
+| Output | automático do Next.js (não use static export) |
+| Node | 20+ (`engines` no `package.json`) |
+
+**Variáveis de ambiente:** nenhuma é obrigatória para o primeiro deploy. Sem `DATABASE_URL` a API usa SQLite em memória, faz o seed e a UI sobe. Dados somem em cold start.
+
+Para persistir (recomendado depois):
+
+1. Crie um banco [Turso](https://turso.tech)
+2. Em **Settings → Environment Variables** (Production + Preview):
+   - `DATABASE_URL` = `libsql://...`
+   - `DATABASE_AUTH_TOKEN` = token do Turso
+3. Redeploy
+
+O `@vercel/analytics` já está no layout. Depois do deploy, ative Analytics no projeto se quiser o painel.
+
+Branch desta sessão: `arena/01a034a9-sazionalidade`. No import, selecione essa branch se ainda não mergeou em `main`.
 
 ## Licença
 

@@ -70,18 +70,28 @@ const globalForDb = globalThis as typeof globalThis & {
   __schemaReady?: Promise<void>;
 };
 
+function isServerlessRuntime(): boolean {
+  return (
+    process.env.VERCEL === "1" ||
+    process.env.NOW_BUILD === "1" ||
+    process.env.CF_PAGES === "1"
+  );
+}
+
 function resolveDbUrl(): string {
   if (process.env.DATABASE_URL) {
     return process.env.DATABASE_URL;
   }
 
-  const isServerless =
-    process.env.VERCEL === "1" ||
-    process.env.NOW_BUILD === "1" ||
-    process.env.CF_PAGES === "1";
-  const dbDir = isServerless ? "/tmp" : process.cwd();
+  // Serverless filesystems are read-only except /tmp. Prefer memory so a
+  // Vercel import works with zero env vars; seed runs on cold start.
+  if (isServerlessRuntime() && !process.env.SQLITE_DB_PATH) {
+    return "file::memory:?cache=shared";
+  }
+
+  const dbDir = isServerlessRuntime() ? "/tmp" : process.cwd();
   const dbPath = process.env.SQLITE_DB_PATH || path.join(dbDir, "sqlite.db");
-  return `file:${dbPath}`;
+  return dbPath.startsWith("file:") ? dbPath : `file:${path.resolve(dbPath)}`;
 }
 
 export function getSqliteClient(): Client {
