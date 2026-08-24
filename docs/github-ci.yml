@@ -1,3 +1,4 @@
+# Copie para .github/workflows/ci.yml quando o token tiver permissão "workflows".
 name: CI
 
 on:
