@@ -26,7 +26,7 @@ npm run lint
 npm run build
 ```
 
-O workflow em `.github/workflows/ci.yml` executa lint e build em push/PR para `main`.
+O modelo de CI está em `docs/github-ci.yml` (lint + build). Copie para `.github/workflows/ci.yml` quando o token do GitHub tiver permissão `workflows`.
 
 ## Estrutura
 
