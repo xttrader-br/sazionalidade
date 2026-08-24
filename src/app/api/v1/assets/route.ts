@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { fetchAllAssetsWithBias } from "@/lib/seasonality";
-import { db } from "@/db";
+import { db, ensureSchema } from "@/db";
 import { assets, monthlySeasonality, assetTechnicals } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
@@ -46,6 +46,7 @@ export async function POST(request: Request) {
 
     const uppercaseTicker = ticker.toUpperCase();
 
+    await ensureSchema();
     const existing = await db.select().from(assets).where(eq(assets.ticker, uppercaseTicker)).limit(1);
     if (existing.length > 0) {
       return NextResponse.json({ success: false, error: `Asset ${uppercaseTicker} already exists.` }, { status: 409 });

@@ -41,9 +41,9 @@ export default function ScraperGuideAndApiDocs() {
       const res = await fetch(apiEndpoint, { method: apiMethod });
       const data = await res.json();
       setApiResponse(data);
-    } catch (err: any) {
-      setApiResponse({ error: err.message });
-    } fiunal: {
+    } catch (err: unknown) {
+      setApiResponse({ error: err instanceof Error ? err.message : "unknown error" });
+    } finally {
       setApiLoading(false);
     }
   };
@@ -206,7 +206,7 @@ getEquityClockBias('gld').then(console.log);
               Vantagens do Banco de Dados SQLite em Arquivo Local
             </h3>
             <p className="text-xs text-slate-300 leading-relaxed">
-              Não é necessário instalar PostgreSQL, Docker ou contratar bancos de dados na nuvem! O aplicativo gerencia um banco de dados relacional em arquivo `sqlite.db` local com **Better-SQLite3** e **Drizzle ORM**.
+              Não é necessário instalar PostgreSQL, Docker ou contratar bancos de dados na nuvem! O aplicativo gerencia um banco de dados relacional em arquivo `sqlite.db` local com **libSQL** e **Drizzle ORM**.
             </p>
           </div>
 
@@ -275,7 +275,7 @@ getEquityClockBias('gld').then(console.log);
               <div className="text-xs font-mono font-bold text-amber-400 uppercase">3. Janelas Sazonais</div>
               <h4 className="text-sm font-semibold text-white">Datas de Entrada & Saída</h4>
               <p className="text-xs text-slate-400">
-                Períodos de início e término recorrentes (ex: "Janela Bullish do Ouro de 20 de Dezembro a 24 de Fevereiro" ou o rally do Petróleo na Primavera).
+                Períodos de início e término recorrentes (ex: Janela Bullish do Ouro de 20 de Dezembro a 24 de Fevereiro, ou o rally do Petróleo na Primavera).
               </p>
             </div>
           </div>
@@ -420,7 +420,7 @@ getEquityClockBias('gld').then(console.log);
             <pre className="bg-slate-950 border border-slate-800 rounded-xl p-4 text-xs font-mono text-cyan-300 max-h-96 overflow-y-auto">
               {apiResponse
                 ? JSON.stringify(apiResponse, null, 2)
-                : '// Clique em "Enviar Requisição" para ver os dados retornados pela API em tempo real.'}
+                : "// Clique em Enviar Requisição para ver os dados retornados pela API em tempo real."}
             </pre>
           </div>
         </div>

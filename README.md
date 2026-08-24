@@ -4,15 +4,15 @@ Aplicação web para análise de sazonalidade e viés histórico de ativos.
 
 ## Stack
 
-- Next.js com TypeScript
-- Drizzle ORM
-- SQLite para desenvolvimento/local seed
+- Next.js 15 com TypeScript e React 19
+- Drizzle ORM + `@libsql/client` (SQLite local ou Turso em produção)
 - Vercel Analytics
 - Deploy integrado à Vercel
 
 ## Desenvolvimento
 
 ```bash
+cp .env.example .env
 npm install
 npm run dev
 ```
@@ -26,7 +26,7 @@ npm run lint
 npm run build
 ```
 
-A validação deve ser executada no ambiente local ou no pipeline da Vercel antes do deploy de produção.
+O workflow em `.github/workflows/ci.yml` executa lint e build em push/PR para `main`.
 
 ## Estrutura
 
@@ -38,7 +38,16 @@ A validação deve ser executada no ambiente local ou no pipeline da Vercel ante
 
 ## Banco de dados
 
-Arquivos SQLite locais e auxiliares WAL/SHM não devem ser versionados. Para produção serverless, utilize um banco persistente compatível com o ambiente de deploy; não dependa de escrita em disco local da Vercel.
+Arquivos SQLite locais (`*.db`, `*.db-wal`, `*.db-shm`) **não são versionados**.
+
+Em produção serverless (Vercel) o SQLite em disco é **efêmero** (`/tmp`). Não dependa de escrita persistente no filesystem da função. Para dados reais, use um banco persistente (Neon, Turso, Cloudflare Hyperdrive / Postgres) e configure a URL no ambiente de deploy.
+
+Scripts Drizzle:
+
+```bash
+npm run db:generate
+npm run db:studio
+```
 
 ## Deploy
 
@@ -46,4 +55,4 @@ O projeto está vinculado ao repositório `xttrader-br/sazionalidade` na Vercel.
 
 ## Licença
 
-Definir licença antes da distribuição pública.
+MIT — ver `LICENSE`.
