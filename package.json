@@ -12,30 +12,30 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "@libsql/client": "^0.15.9",
     "@radix-ui/react-dialog": "^1.1.14",
     "@radix-ui/react-slot": "^1.2.3",
-    "@vercel/analytics": "^1.5.0",
-    "@libsql/client": "^0.15.9",
+    "@vercel/analytics": "^1.6.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.44.5",
     "lucide-react": "^0.468.0",
-    "recharts": "^2.15.3",
     "next": "^15.5.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "recharts": "^2.15.3",
     "tailwind-merge": "^2.6.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4.1.11",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@tailwindcss/postcss": "^4.1.11",
     "drizzle-kit": "^0.31.4",
     "eslint": "^9.15.0",
-    "tailwindcss": "^4.1.11",
     "eslint-config-next": "^15.5.0",
+    "tailwindcss": "^4.1.11",
     "typescript": "^5"
   }
 }
